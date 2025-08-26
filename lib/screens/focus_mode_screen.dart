@@ -26,6 +26,14 @@ class _FocusModeScreenState extends State<FocusModeScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A192F),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0A192F),
+        title: const Text(
+          'Focus Mode',
+          style: TextStyle(color: Colors.white),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

@@ -91,9 +91,33 @@ class _HomePageState extends State<HomePage> {
       body: _screens.isNotEmpty && _selectedIndex < _screens.length 
           ? _screens[_selectedIndex] 
           : const Center(
-              child: Text(
-                'No content available',
-                style: TextStyle(color: Colors.white),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.dashboard,
+                    color: Color(0xFF4A9EFF),
+                    size: 64,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Welcome to WarmNest',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Select a feature from the menu to get started',
+                    style: TextStyle(
+                      color: Color(0xFF9CA3AF),
+                      fontSize: 16,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
     );
@@ -167,6 +191,30 @@ class _HomePageState extends State<HomePage> {
                         _selectedIndex = index;
                       });
                       Navigator.pop(context);
+                      
+                      // Navigate to the selected screen
+                      switch (index) {
+                        case 0: // Dashboard
+                          break;
+                        case 1: // Breathing
+                          Navigator.pushNamed(context, '/breathing');
+                          break;
+                        case 2: // Chatbot
+                          Navigator.pushNamed(context, '/chatbot');
+                          break;
+                        case 3: // Journal
+                          Navigator.pushNamed(context, '/journal');
+                          break;
+                        case 4: // Music
+                          Navigator.pushNamed(context, '/music');
+                          break;
+                        case 5: // Focus
+                          Navigator.pushNamed(context, '/focus');
+                          break;
+                        case 6: // Assessment
+                          Navigator.pushNamed(context, '/assessment');
+                          break;
+                      }
                     },
                   ),
                 );

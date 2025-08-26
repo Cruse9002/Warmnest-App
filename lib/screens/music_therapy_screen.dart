@@ -7,68 +7,46 @@ class MusicTherapyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A192F),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0A192F),
+        title: const Text(
+          'Music Therapy',
+          style: TextStyle(color: Colors.white),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Music Therapy Room',
+              'Therapeutic Sounds & Music',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ) ?? const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Relax and unwind with sounds tailored for you, and explore common therapeutic sounds.',
+              'Immerse yourself in calming sounds designed to reduce stress and promote relaxation.',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: const Color(0xFF9CA3AF),
+              ) ?? const TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontSize: 16,
               ),
             ),
             const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF374151)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.equalizer, color: Color(0xFF4A9EFF)),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Personalized Music (Gentle Melodies)',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: const Color(0xFF4A9EFF),
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'No specific tracks found for your preferences. Try exploring common sounds!',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF9CA3AF),
-              ),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'Common Therapeutic Sounds',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: const Color(0xFF4A9EFF),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 3,
-              mainAxisSpacing: 16,
+              crossAxisCount: 1,
+              mainAxisSpacing: 20,
               crossAxisSpacing: 16,
               childAspectRatio: 0.8,
               children: [
@@ -77,21 +55,18 @@ class MusicTherapyScreen extends StatelessWidget {
                   'River Flow',
                   'Gentle river ambience ideal for relaxation',
                   '6:20',
-                  'https://pixabay.com/get/g88fcbf707c1aa58ec03a293813e56311acb9962dae258993d2518a2c6febccd7cbc81daa921f1f14647662c326845abcb61566bc6311ce73e69f8583a8228553_1280.jpg',
                 ),
                 _buildSoundCard(
                   context,
                   'Sleep',
                   'Soothing piano piece to ease into sleep',
                   '10:00',
-                  'https://pixabay.com/get/g262ac685330d2d9ccef0ba6fb9dc4a2b1249474a93caba8f3ace12d231ff7c2210dbcf5ddc5f28cef4081040db9b8310b7833ffe36d0aebc878f5c66be97aeb6_1280.jpg',
                 ),
                 _buildSoundCard(
                   context,
                   'Ocean Waves',
                   'A deep soundscape that guides external distractions for profound introspection',
                   '1:45',
-                  'https://pixabay.com/get/g1cd9bc78121080438edb91ada03f6365495edcbadf7bd4a1c278388f1222d846e0358fcb7cc22f7cfee44ec922fdbba38b85bc055cc80fa4160268bada7f5699_1280.jpg',
                 ),
               ],
             ),
@@ -128,106 +103,100 @@ class MusicTherapyScreen extends StatelessWidget {
     String title,
     String description,
     String duration,
-    String imageUrl,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF374151)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
+    return GestureDetector(
+      onTap: () => _playSound(context, title),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFF374151)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
               width: double.infinity,
+              height: 120,
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-                image: DecorationImage(
-                  image: NetworkImage(imageUrl),
-                  fit: BoxFit.cover,
-                ),
+                color: const Color(0xFF4A9EFF).withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.7),
-                        ],
-                      ),
-                    ),
+              child: const Icon(
+                Icons.music_note,
+                color: Color(0xFF4A9EFF),
+                size: 48,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: const Color(0xFF4A9EFF),
+                fontWeight: FontWeight.bold,
+              ) ?? const TextStyle(
+                color: Color(0xFF4A9EFF),
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: const Color(0xFF9CA3AF),
+                height: 1.4,
+              ) ?? const TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontSize: 14,
+                height: 1.4,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.schedule, color: Color(0xFF9CA3AF), size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  duration,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: const Color(0xFF9CA3AF),
+                  ) ?? const TextStyle(
+                    color: Color(0xFF9CA3AF),
+                    fontSize: 12,
                   ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF4A9EFF),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.play_arrow, color: Colors.white, size: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4A9EFF),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.play_arrow, color: Colors.white, size: 16),
+                  SizedBox(width: 8),
+                  Text(
+                    'Play Sound',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.volume_up, color: Color(0xFF4A9EFF), size: 16),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF9CA3AF),
-                    height: 1.3,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  duration,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF9CA3AF),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -238,47 +207,111 @@ class MusicTherapyScreen extends StatelessWidget {
     String description,
     String duration,
   ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF374151)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.music_note, color: Color(0xFF4A9EFF)),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: () => _playSound(context, title),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF374151)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.music_note, color: Color(0xFF4A9EFF)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ) ?? const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: const Color(0xFF9CA3AF),
+              ) ?? const TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              duration,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: const Color(0xFF9CA3AF),
+              ) ?? const TextStyle(
+                color: Color(0xFF9CA3AF),
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _playSound(BuildContext context, String title) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: Text(
+            'Play $title',
+            style: const TextStyle(color: Colors.white),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Would you like to play this sound?',
+                style: TextStyle(color: Color(0xFF9CA3AF)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Find a comfortable position and enjoy the therapeutic sounds.',
+                style: TextStyle(color: Color(0xFF9CA3AF)),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            description,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF9CA3AF),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Color(0xFF9CA3AF)),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            duration,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF9CA3AF),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Now playing: $title'),
+                    backgroundColor: const Color(0xFF4A9EFF),
+                  ),
+                );
+              },
+              child: const Text('Play'),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }

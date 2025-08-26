@@ -2,6 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:warmnest/theme.dart';
 import 'package:warmnest/home_page.dart';
+import 'package:warmnest/screens/breathing_exercises_screen.dart';
+import 'package:warmnest/screens/chatbot_screen.dart';
+import 'package:warmnest/screens/journal_screen.dart';
+import 'package:warmnest/screens/music_therapy_screen.dart';
+import 'package:warmnest/screens/focus_mode_screen.dart';
+import 'package:warmnest/screens/task_assessment_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,6 +102,14 @@ class MyApp extends StatelessWidget {
           }
         },
       ),
+      routes: {
+        '/breathing': (context) => const BreathingExercisesScreen(),
+        '/chatbot': (context) => const ChatbotScreen(),
+        '/journal': (context) => const JournalScreen(),
+        '/music': (context) => const MusicTherapyScreen(),
+        '/focus': (context) => const FocusModeScreen(),
+        '/assessment': (context) => const TaskAssessmentScreen(),
+      },
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),

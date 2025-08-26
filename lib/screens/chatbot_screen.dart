@@ -28,6 +28,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A192F),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0A192F),
+        title: const Text(
+          'Mental Wellness Chatbot',
+          style: TextStyle(color: Colors.white),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: Column(
         children: [
           Container(
