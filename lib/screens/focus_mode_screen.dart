@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:warmnest/app_state.dart';
+import 'package:warmnest/models.dart';
 
 class FocusModeScreen extends StatefulWidget {
   const FocusModeScreen({super.key});
@@ -34,7 +36,8 @@ class _FocusModeScreenState extends State<FocusModeScreen>
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,6 +266,7 @@ class _FocusModeScreenState extends State<FocusModeScreen>
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -282,6 +286,17 @@ class _FocusModeScreenState extends State<FocusModeScreen>
           } else {
             _isRunning = false;
             timer.cancel();
+            final app = AppStateProvider.of(context);
+            app.addPomodoroSession(
+              PomodoroSession(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                startTime: DateTime.now().subtract(Duration(minutes: _totalMinutes)),
+                endTime: DateTime.now(),
+                workDurationMinutes: _totalMinutes,
+                breakDurationMinutes: 5,
+                cyclesCompleted: 1,
+              ),
+            );
           }
         });
       });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:warmnest/app_state.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -7,9 +8,10 @@ class DashboardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0A192F),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -60,31 +62,35 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4A9EFF),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.mood, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Log Your Mood',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ) ?? const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+            Builder(builder: (context) {
+              final app = AppStateProvider.of(context);
+              final recentMood = app.moodLogs.isNotEmpty ? app.moodLogs.last.mood : '—';
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4A9EFF),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.mood, color: Colors.white),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Recent Mood: $recentMood',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ) ?? const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              );
+            }),
             const SizedBox(height: 32),
             Row(
               children: [
@@ -92,7 +98,7 @@ class DashboardScreen extends StatelessWidget {
                   child: _buildProgressCard(
                     context,
                     'Weekly Progress',
-                    '7/7 days',
+                    _weeklyProgress(context),
                     Icons.trending_up,
                     const Color(0xFF059669),
                   ),
@@ -102,7 +108,7 @@ class DashboardScreen extends StatelessWidget {
                   child: _buildProgressCard(
                     context,
                     'Mood Average',
-                    '8.5/10',
+                    _moodAverage(context),
                     Icons.mood,
                     const Color(0xFFF59E0B),
                   ),
@@ -122,44 +128,49 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 1.2,
-              children: [
-                _buildQuickActionCard(
-                  context,
-                  'Start a Breathing Exercise',
-                  'Start Exercise',
-                  Icons.air,
-                  const Color(0xFF059669),
-                ),
-                _buildQuickActionCard(
-                  context,
-                  'Chat with Wellness Bot',
-                  'Chat with Wellness Bot',
-                  Icons.chat_bubble_outline,
-                  const Color(0xFF3B82F6),
-                ),
-                _buildQuickActionCard(
-                  context,
-                  'Log Your Mood',
-                  'Log Your Mood',
-                  Icons.edit,
-                  const Color(0xFFF59E0B),
-                ),
-                _buildQuickActionCard(
-                  context,
-                  'Write in Your Journal',
-                  'Write in Your Journal',
-                  Icons.book,
-                  const Color(0xFF8B5CF6),
-                ),
-              ],
-            ),
+            LayoutBuilder(builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final columns = width >= 1200 ? 4 : width >= 900 ? 3 : width >= 600 ? 2 : 1;
+              final aspect = width >= 900 ? 1.2 : 1.0;
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: columns,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: aspect,
+                children: [
+                  _buildQuickActionCard(
+                    context,
+                    'Start a Breathing Exercise',
+                    'Start Exercise',
+                    Icons.air,
+                    const Color(0xFF059669),
+                  ),
+                  _buildQuickActionCard(
+                    context,
+                    'Chat with Wellness Bot',
+                    'Chat with Wellness Bot',
+                    Icons.chat_bubble_outline,
+                    const Color(0xFF3B82F6),
+                  ),
+                  _buildQuickActionCard(
+                    context,
+                    'Log Your Mood',
+                    'Log Your Mood',
+                    Icons.edit,
+                    const Color(0xFFF59E0B),
+                  ),
+                  _buildQuickActionCard(
+                    context,
+                    'Write in Your Journal',
+                    'Write in Your Journal',
+                    Icons.book,
+                    const Color(0xFF8B5CF6),
+                  ),
+                ],
+              );
+            }),
             const SizedBox(height: 32),
             Row(
               children: [
@@ -185,6 +196,7 @@ class DashboardScreen extends StatelessWidget {
               ],
             ),
           ],
+        ),
         ),
       ),
     );
@@ -360,6 +372,24 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _weeklyProgress(BuildContext context) {
+    final app = AppStateProvider.of(context);
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final count = app.breathingSessions.where((s) => s.timestamp.isAfter(startOfWeek)).length +
+        app.pomodoroSessions.where((s) => s.startTime.isAfter(startOfWeek)).length +
+        app.moodLogs.where((s) => s.timestamp.isAfter(startOfWeek)).length +
+        app.journalEntries.where((s) => s.timestamp.isAfter(startOfWeek)).length;
+    return '$count actions';
+  }
+
+  String _moodAverage(BuildContext context) {
+    final app = AppStateProvider.of(context);
+    if (app.moodLogs.isEmpty) return '—';
+    final avg = app.moodLogs.map((e) => e.intensity).fold<int>(0, (a, b) => a + b) / app.moodLogs.length;
+    return '${avg.toStringAsFixed(1)}/10';
   }
 
   void _showMoodDialog(BuildContext context) {

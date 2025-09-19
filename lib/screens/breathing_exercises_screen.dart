@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:warmnest/app_state.dart';
+import 'package:warmnest/models.dart';
 
 class BreathingExercisesScreen extends StatelessWidget {
   const BreathingExercisesScreen({super.key});
@@ -15,7 +17,8 @@ class BreathingExercisesScreen extends StatelessWidget {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,13 +45,18 @@ class BreathingExercisesScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 1,
-              mainAxisSpacing: 20,
-              childAspectRatio: 2.2,
-              children: [
+            LayoutBuilder(builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final columns = width >= 900 ? 2 : 1;
+              final aspect = width >= 900 ? 2.2 : 1.6;
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: columns,
+                mainAxisSpacing: 20,
+                crossAxisSpacing: 20,
+                childAspectRatio: aspect,
+                children: [
                 _buildBreathingCard(
                   context,
                   'Box Breathing',
@@ -68,16 +76,21 @@ class BreathingExercisesScreen extends StatelessWidget {
                   '7 min',
                 ),
               ],
-            ),
+              );
+            }),
             const SizedBox(height: 24),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 1.8,
-              children: [
+            LayoutBuilder(builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final columns = width >= 900 ? 3 : 2;
+              final aspect = width >= 900 ? 2.0 : 1.4;
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: columns,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: aspect,
+                children: [
                 _buildTechniqueCard(
                   context,
                   'Mindful Breathing',
@@ -91,9 +104,11 @@ class BreathingExercisesScreen extends StatelessWidget {
                   '6 min',
                 ),
               ],
-            ),
+              );
+            }),
           ],
         ),
+      ),
       ),
     );
   }
@@ -326,7 +341,17 @@ class BreathingExercisesScreen extends StatelessWidget {
           ),
           actions: [
             ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () async {
+                final app = AppStateProvider.of(context);
+                await app.addBreathingSession(
+                  BreathingSession(
+                    exerciseId: title,
+                    durationMinutes: 5,
+                    timestamp: DateTime.now(),
+                  ),
+                );
+                if (context.mounted) Navigator.of(context).pop();
+              },
               child: const Text('Finish'),
             ),
           ],

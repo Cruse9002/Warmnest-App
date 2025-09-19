@@ -6,6 +6,7 @@ import 'package:warmnest/screens/journal_screen.dart';
 import 'package:warmnest/screens/music_therapy_screen.dart';
 import 'package:warmnest/screens/focus_mode_screen.dart';
 import 'package:warmnest/screens/task_assessment_screen.dart';
+import 'package:warmnest/screens/profile_screen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,7 +21,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    print('HomePage initialized successfully');
   }
   
   final List<Widget> _screens = [
@@ -89,7 +89,7 @@ class _HomePageState extends State<HomePage> {
       ),
       drawer: _buildDrawer(),
       body: _screens.isNotEmpty && _selectedIndex < _screens.length 
-          ? _screens[_selectedIndex] 
+          ? SafeArea(child: _screens[_selectedIndex]) 
           : const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -235,7 +235,13 @@ class _HomePageState extends State<HomePage> {
                       fontSize: 14,
                     ),
                   ),
-                  onTap: () => Navigator.pop(context),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                    );
+                  },
                 ),
                 ListTile(
                   leading: const Icon(Icons.settings, color: Colors.white),

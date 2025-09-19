@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:warmnest/app_state.dart';
+import 'package:warmnest/models.dart';
 
 class JournalScreen extends StatefulWidget {
   const JournalScreen({super.key});
@@ -21,14 +23,7 @@ class _JournalScreenState extends State<JournalScreen>
     MoodOption(emoji: '😢', label: 'Sad'),
   ];
 
-  final List<JournalEntry> _recentEntries = [
-    JournalEntry(
-      mood: '😊',
-      moodLabel: 'Happy',
-      note: 'xyz',
-      date: 'Jul 29, 2025, 11:14:31 AM',
-    ),
-  ];
+  // Deprecated local cache; entries now read from AppState
 
   @override
   void initState() {
@@ -48,7 +43,8 @@ class _JournalScreenState extends State<JournalScreen>
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Column(
+      body: SafeArea(
+        child: Column(
         children: [
           Container(
             color: const Color(0xFF1E293B),
@@ -73,6 +69,7 @@ class _JournalScreenState extends State<JournalScreen>
             ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -120,20 +117,39 @@ class _JournalScreenState extends State<JournalScreen>
             ),
           ),
           const SizedBox(height: 24),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4A9EFF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              'Save Mood',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          GestureDetector(
+            onTap: () async {
+              final app = AppStateProvider.of(context);
+              final selected = _selectedMood.isEmpty ? 'neutral' : _selectedMood.toLowerCase();
+              await app.addMood(
+                MoodLog(
+                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  mood: selected,
+                  intensity: 5,
+                  timestamp: DateTime.now(),
+                  note: _noteController.text.trim(),
+                ),
+              );
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Mood saved')),
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4A9EFF),
+                borderRadius: BorderRadius.circular(12),
               ),
-              textAlign: TextAlign.center,
+              child: Text(
+                'Save Mood',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
           const SizedBox(height: 40),
@@ -170,28 +186,37 @@ class _JournalScreenState extends State<JournalScreen>
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF4A9EFF),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              'Add New Entry',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          GestureDetector(
+            onTap: () async {
+              await _openNewEntryDialog();
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4A9EFF),
+                borderRadius: BorderRadius.circular(12),
               ),
-              textAlign: TextAlign.center,
+              child: Text(
+                'Add New Entry',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
           const SizedBox(height: 24),
           Expanded(
-            child: ListView.builder(
-              itemCount: _recentEntries.length,
-              itemBuilder: (context, index) {
-                final entry = _recentEntries[index];
+            child: Builder(
+              builder: (context) {
+                final app = AppStateProvider.of(context);
+                final entries = app.journalEntries;
+                return ListView.builder(
+                  itemCount: entries.length,
+                  itemBuilder: (context, index) {
+                    final e = entries[entries.length - 1 - index];
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(16),
@@ -203,46 +228,75 @@ class _JournalScreenState extends State<JournalScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            entry.mood,
-                            style: const TextStyle(fontSize: 24),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            entry.moodLabel,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            entry.date,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: const Color(0xFF9CA3AF),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (entry.note.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'Note: ${entry.note}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: const Color(0xFF9CA3AF),
-                          ),
+                      Text(
+                        e.content,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
                         ),
-                      ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        e.timestamp.toLocal().toString(),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFF9CA3AF),
+                        ),
+                      ),
                     ],
                   ),
+                );
+                  },
                 );
               },
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _openNewEntryDialog() async {
+    final controller = TextEditingController();
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E293B),
+          title: const Text('New Journal Entry', style: TextStyle(color: Colors.white)),
+          content: TextField(
+            controller: controller,
+            maxLines: 6,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              hintText: 'Write your thoughts... ',
+              hintStyle: TextStyle(color: Color(0xFF9CA3AF)),
+              border: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF374151))),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel', style: TextStyle(color: Color(0xFF9CA3AF))),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final content = controller.text.trim();
+                if (content.isNotEmpty) {
+                  final app = AppStateProvider.of(context);
+                  await app.addJournal(
+                    JournalEntryModel(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      content: content,
+                      timestamp: DateTime.now(),
+                    ),
+                  );
+                }
+                if (context.mounted) Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 

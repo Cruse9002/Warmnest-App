@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 
-class MusicTherapyScreen extends StatelessWidget {
+class MusicTherapyScreen extends StatefulWidget {
   const MusicTherapyScreen({super.key});
+
+  @override
+  State<MusicTherapyScreen> createState() => _MusicTherapyScreenState();
+}
+
+class _MusicTherapyScreenState extends State<MusicTherapyScreen> {
+  final AudioPlayer _player = AudioPlayer();
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +23,8 @@ class MusicTherapyScreen extends StatelessWidget {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,14 +51,18 @@ class MusicTherapyScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 1,
-              mainAxisSpacing: 20,
-              crossAxisSpacing: 16,
-              childAspectRatio: 0.8,
-              children: [
+            LayoutBuilder(builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final columns = width >= 1200 ? 3 : width >= 800 ? 2 : 1;
+              final aspect = width >= 1200 ? 1.1 : width >= 800 ? 0.9 : 0.8;
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: columns,
+                mainAxisSpacing: 20,
+                crossAxisSpacing: 16,
+                childAspectRatio: aspect,
+                children: [
                 _buildSoundCard(
                   context,
                   'River Flow',
@@ -69,31 +82,38 @@ class MusicTherapyScreen extends StatelessWidget {
                   '1:45',
                 ),
               ],
-            ),
+              );
+            }),
             const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildMiniSoundCard(
+            LayoutBuilder(builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final columns = width >= 900 ? 3 : 2;
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: columns,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 2.4,
+                children: [
+                  _buildMiniSoundCard(
                     context,
                     'Rain Sounds',
                     'Peaceful rainfall',
                     '15:30',
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildMiniSoundCard(
+                  _buildMiniSoundCard(
                     context,
                     'Forest Birds',
                     'Morning birdsong',
                     '12:15',
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            }),
           ],
         ),
+      ),
       ),
     );
   }
@@ -298,7 +318,7 @@ class MusicTherapyScreen extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -306,6 +326,9 @@ class MusicTherapyScreen extends StatelessWidget {
                     backgroundColor: const Color(0xFF4A9EFF),
                   ),
                 );
+                // In absence of bundled assets, play a short remote sample tone
+                await _player.stop();
+                await _player.play(UrlSource('https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav'));
               },
               child: const Text('Play'),
             ),
@@ -313,5 +336,11 @@ class MusicTherapyScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
   }
 }

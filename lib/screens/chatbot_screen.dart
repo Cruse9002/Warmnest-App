@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:warmnest/app_state.dart';
+import 'package:warmnest/models.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
@@ -9,20 +11,7 @@ class ChatbotScreen extends StatefulWidget {
 
 class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final List<ChatMessage> _messages = [
-    ChatMessage(
-      text: 'Hello! How can I help you with your mental wellness today?',
-      isBot: true,
-    ),
-    ChatMessage(
-      text: 'Hi',
-      isBot: false,
-    ),
-    ChatMessage(
-      text: "Sorry, I couldn't process your request right now.",
-      isBot: true,
-    ),
-  ];
+  late List<ChatMessageModel> _messages;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +25,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Column(
+      body: SafeArea(
+        child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(20),
@@ -49,14 +39,28 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                return _buildMessageBubble(message);
-              },
-            ),
+            child: Builder(builder: (context) {
+              final app = AppStateProvider.of(context);
+              _messages = app.chatHistory;
+              if (_messages.isEmpty) {
+                _messages = [
+                  ChatMessageModel(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    text: 'Hello! How can I help you with your mental wellness today?',
+                    isBot: true,
+                    timestamp: DateTime.now(),
+                  ),
+                ];
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  return _buildMessageBubble(message);
+                },
+              );
+            }),
           ),
           Container(
             padding: const EdgeInsets.all(20),
@@ -110,11 +114,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
 
-  Widget _buildMessageBubble(ChatMessage message) {
+  Widget _buildMessageBubble(ChatMessageModel message) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -167,16 +172,21 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   void _sendMessage() {
     if (_messageController.text.trim().isNotEmpty) {
-      setState(() {
-        _messages.add(ChatMessage(
-          text: _messageController.text,
-          isBot: false,
-        ));
-        _messages.add(ChatMessage(
-          text: "Thanks for sharing! I'm here to help with your mental wellness journey. How are you feeling today?",
-          isBot: true,
-        ));
-      });
+      final app = AppStateProvider.of(context);
+      final userMsg = ChatMessageModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        text: _messageController.text,
+        isBot: false,
+        timestamp: DateTime.now(),
+      );
+      final botMsg = ChatMessageModel(
+        id: (DateTime.now().millisecondsSinceEpoch + 1).toString(),
+        text: "Thanks for sharing! I'm here to help with your mental wellness journey. How are you feeling today?",
+        isBot: true,
+        timestamp: DateTime.now(),
+      );
+      app.addChatMessage(userMsg);
+      app.addChatMessage(botMsg);
       _messageController.clear();
     }
   }
@@ -188,9 +198,4 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 }
 
-class ChatMessage {
-  final String text;
-  final bool isBot;
-
-  ChatMessage({required this.text, required this.isBot});
-}
+// moved to models.dart as ChatMessageModel
